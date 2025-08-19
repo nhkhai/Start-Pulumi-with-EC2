@@ -33,3 +33,19 @@ jobs:
         env: 
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GIT_SHA: ${{ github.sha }}
+
+      - name: Get S3 bucket name from Pulumi outputs
+        # This step retrieves the exported 's3_bucket_name' from your stack
+        # and makes it available to subsequent steps in the job.
+        id: get_bucket_name
+        run: |
+          cd infra # Change to the Pulumi project directory
+          echo "BUCKET_NAME=$(pulumi stack output s3_bucket_name)" >> $GITHUB_ENV
+
+      - name: Package application code
+        run: zip -r app.zip ./app
+
+      - name: Upload application to S3
+        run: |
+          echo "Uploading app.zip to bucket ${{ env.BUCKET_NAME }}"
+          aws s3 cp app.zip s3://${{ env.BUCKET_NAME }}/app.zip

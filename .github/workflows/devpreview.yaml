@@ -1,47 +1,41 @@
-name: DevDeploy
-on: 
-  pull_request: 
-    branches: 
-      - "dev"
+name: PR Preview (Dev)
 
-jobs: 
-  DevPreview: 
-    name: Dev Preview 
-    runs-on: ubuntu-24.04
-    permissions: 
-      id-token: write 
-      contents: read 
-      pull-requests: write 
-    
-    steps: 
-      - uses: actions/checkout@4
+on:
+  pull_request:
+    branches:
+      - "dev" # Triggers when a PR is opened targeting the 'dev' branch
 
-      - name: Configure AWS credentials OIDC 
-        uses: aws-actions/configure-aws-credentials@v4 
-        with: 
-          role-to-assume: ${{ secrets.ActionsRoleArn  }}
+jobs:
+  PulumiPreview:
+    name: Pulumi Preview
+    runs-on: ubuntu-latest # ubuntu-24.04 is fine, latest is common
+    permissions:
+      id-token: write      # For AWS OIDC
+      contents: read       # To checkout the code
+      pull-requests: write # To comment on the PR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ActionsRoleArn }}
           aws-region: ap-southeast-1
-      
-      - name: Zip sources 
-        run: | 
-          rm -rf build/ 
-          mkdir build 
-          find . -exec touch -t "$(git ls-files -z . | \
-          xargs -0 -n1 -I{} -- git log -1 --date=format:"%Y%m%d%H%M" --format="%ad" '{}' | \
-          sort -r | head -n 1)" '{}' +
-          zip -rq -X -9 -A --compression-method deflate build/lambda.zip *.py
-      
-      - uses: pulumi/action@v5 
-        with: 
-          command: preview 
-          stack-name: veraz00/dev 
-          work-dir: infra 
-          commnet-on-pr: true  
-# When you create a PR in your GitHub repository, Pulumi will detect the change and trigger a deployment.
-# After the deployment completes, Pulumi will comment on the PR with the results of the deployment, including any errors or warnings.
 
+      # OPTIONAL: This step validates that your app code can be packaged.
+      # It doesn't upload anything, just creates the zip file.
+      - name: Package application code for validation
+        run: zip -r app.zip ./app
 
+      - name: Run Pulumi Preview
+        uses: pulumi/actions@v5
+        with:
+          command: preview
+          stack-name: veraz00/dev # Or just 'dev' if the org is in the token
+          work-dir: infra        # Your Pulumi code is in the 'infra' subdirectory
+          comment-on-pr: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          GIT_SHA: ${{ github.sha }}

@@ -1,0 +1,39 @@
+name: Manual Destroy Infrastructure (with Approval)
+
+on:
+  workflow_dispatch:
+    inputs:
+      stackName:
+        description: 'The Pulumi stack to destroy (e.g., dev, prod). Type the name to confirm.'
+        required: true
+
+jobs:
+  destroy:
+    name: Pulumi Destroy
+    runs-on: ubuntu-24.04
+    
+    # *** THIS IS THE KEY ADDITION ***
+    # This job targets the 'production' environment, which has a protection rule.
+    environment: production
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@4
+
+      - name: Configure AWS credentials OIDC 
+        uses: aws-actions/configure-aws-credentials@v4 
+        with: 
+          role-to-assume: ${{ secrets.ActionsRoleArn  }}
+          aws-region: ap-southeast-1
+      
+      - name: Run Pulumi Destroy
+        uses: pulumi/actions@v4
+        with:
+          command: destroy
+          stack-name: ${{ github.event.inputs.stackName }}
+          args: --yes
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
