@@ -1,12 +1,12 @@
 name: DevDeploy
 on: 
-  push: 
+  pull_request: 
     branches: 
       - "dev"
 
 jobs: 
-  StagPreview: 
-    name: Staging Preview 
+  DevPreview: 
+    name: Dev Preview 
     runs-on: ubuntu-24.04
     permissions: 
       id-token: write 
@@ -14,7 +14,8 @@ jobs:
       pull-requests: write 
     
     steps: 
-      - uses: actions/checkout@4 
+      - uses: actions/checkout@4
+
       - name: Configure AWS credentials OIDC 
         uses: aws-actions/configure-aws-credentials@v4 
         with: 

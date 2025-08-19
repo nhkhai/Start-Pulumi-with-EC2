@@ -17,22 +17,76 @@ pulumi.export('project_name', project_name)
 pulumi.export('stack', stack)
 
 
+# --- 1. Create a new VPC ---
+# This creates a dedicated virtual network for your resources.
+vpc = aws.ec2.Vpc("app-vpc",
+    cidr_block="10.0.0.0/16",
+    enable_dns_hostnames=True, # Recommended for many use cases
+    tags={
+        "Name": f"{org}-{stack}-{project_name}-vpc",
+    })
 
+# --- 2. Create an Internet Gateway ---
+# This allows communication between your VPC and the internet.
+internet_gateway = aws.ec2.InternetGateway("app-igw",
+    vpc_id=vpc.id,
+    tags={
+        "Name": f"{org}-{stack}-{project_name}-igw",
+    })
 
-# --- 1. Create a Security Group ---
-# A security group acts as a virtual firewall for your EC2 instance
-# to control inbound and outbound traffic.
-# This example allows inbound SSH (port 22) traffic from anywhere (0.0.0.0/0).
-# For production, restrict this to known IP addresses.
+# --- 3. Create a Route Table ---
+# This defines rules for directing network traffic from your subnets.
+route_table = aws.ec2.RouteTable("app-rt",
+    vpc_id=vpc.id,
+    routes=[
+        # This route sends all traffic destined for outside the VPC (0.0.0.0/0)
+        # to the Internet Gateway.
+        aws.ec2.RouteTableRouteArgs(
+            cidr_block="0.0.0.0/0",
+            gateway_id=internet_gateway.id,
+        ),
+    ],
+    tags={
+        "Name": f"{org}-{stack}-{project_name}-rt",
+    })
+
+# --- 4. Create a Subnet ---
+# An EC2 instance must be launched into a subnet.
+subnet = aws.ec2.Subnet("app-subnet",
+    vpc_id=vpc.id,
+    cidr_block="10.0.1.0/24",  # A smaller range within the VPC's CIDR block
+    map_public_ip_on_launch=True, # Automatically assign a public IP to instances
+    tags={
+        "Name": f"{org}-{stack}-{project_name}-subnet",
+    })
+
+# --- 5. Associate the Route Table with the Subnet ---
+# This connects your subnet to the internet via the route table and internet gateway.
+route_table_association = aws.ec2.RouteTableAssociation("app-rta",
+    subnet_id=subnet.id,
+    route_table_id=route_table.id)
+
+# --- 6. Create a Security Group ---
+# Acts as a virtual firewall for your EC2 instance.
 security_group = aws.ec2.SecurityGroup("web-sg",
-    description="Enable SSH access to EC2 instance",
+    description="Enable HTTP and SSH access to EC2 instance",
+    vpc_id=vpc.id,  # <-- Associate with your new VPC
     ingress=[
-        # Allow SSH from anywhere
+        # Allow SSH from anywhere (for development)
         aws.ec2.SecurityGroupIngressArgs(
             from_port=22,
             to_port=22,
             protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
+            description="Allow SSH access",
+        ),
+        # Allow HTTP from anywhere
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=80,
+            to_port=80,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+            description="Allow HTTP access",
         ),
     ],
     egress=[
@@ -40,18 +94,16 @@ security_group = aws.ec2.SecurityGroup("web-sg",
         aws.ec2.SecurityGroupEgressArgs(
             from_port=0,
             to_port=0,
-            protocol="-1", # -1 means all protocols
+            protocol="-1",
             cidr_blocks=["0.0.0.0/0"],
         ),
     ],
     tags={
-        "Name": f"{org}-{stack}-{project_name}-sg",
+        "Name": f"{org}-{stack}-{project_name}-security-group",
     })
 
-# --- 2. Select an Amazon Machine Image (AMI) ---
-# We're using a public Amazon Linux 2 AMI.
-# You should choose an AMI specific to your region.
-# This example finds the latest Amazon Linux 2 AMI for x86_64 architecture.
+# --- 7. Select an Amazon Machine Image (AMI) ---
+# Finds the latest Amazon Linux 2 AMI for the current region.
 ami = aws.ec2.get_ami(
     most_recent=True,
     owners=["amazon"],
@@ -60,22 +112,19 @@ ami = aws.ec2.get_ami(
         aws.ec2.GetAmiFilterArgs(name="virtualization-type", values=["hvm"]),
     ])
 
-# --- 3. Create an EC2 Instance ---
+# --- 8. Create an EC2 Instance ---
 # This defines the EC2 instance itself.
-# `instance_type`: Defines the hardware specifications (e.g., CPU, memory).
-# `ami`: The ID of the Amazon Machine Image to use.
-# `vpc_security_group_ids`: Associates the instance with our newly created security group.
-# `key_name`: (Optional) If you want to SSH into the instance with a key pair,
-#             you'll need to specify its name here. Make sure the key pair
-#             exists in your AWS account and region.
-#             Example: key_name="my-ssh-key"
 ec2_instance = aws.ec2.Instance("web-server-instance",
-    instance_type="t2.micro",  # A small, cost-effective instance type
+    instance_type="t2.micro",
     ami=ami.id,
+    # ** THE FIX: Specify the subnet ID for the instance **
+    subnet_id=subnet.id,
     vpc_security_group_ids=[security_group.id], # Attach our security group
     tags={
         "Name": f"{org}-{stack}-{project_name}-instance",
     })
+
+
 
 # --- Outputs ---
 # These outputs provide information about the deployed resources
