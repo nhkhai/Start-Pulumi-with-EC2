@@ -1,0 +1,95 @@
+name: Deploy EC2 App
+
+on:
+  push:
+    branches:
+      - "dev"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+        - deploy
+        - destroy
+
+env:
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  deploy:
+    name: ${{ github.event.inputs.action == 'destroy' && 'Destroy EC2 Infrastructure' || 'Deploy to EC2' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Pulumi CLI
+        uses: pulumi/actions@v5
+
+      - name: Install dependencies
+        working-directory: ./infra
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Deploy infrastructure
+        if: github.event.inputs.action != 'destroy'
+        uses: pulumi/actions@v5
+        with:
+          command: up
+          stack-name: dev
+          work-dir: infra
+          refresh: true
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Show deployment info
+        if: github.event.inputs.action != 'destroy'
+        working-directory: ./infra
+        run: |
+          echo "🚀 Deployment completed!"
+          echo ""
+          PUBLIC_IP=$(pulumi stack output public_ip --stack dev)
+          echo "🌐 Your web application is available at: http://$PUBLIC_IP"
+          echo ""
+          echo "Instance details:"
+          echo "  Instance ID: $(pulumi stack output instance_id --stack dev)"
+          echo "  Public DNS: $(pulumi stack output public_dns --stack dev)"
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Destroy infrastructure
+        if: github.event.inputs.action == 'destroy'
+        uses: pulumi/actions@v5
+        with:
+          command: destroy
+          stack-name: dev
+          work-dir: infra
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Confirm destruction
+        if: github.event.inputs.action == 'destroy'
+        run: |
+          echo "🎯 Infrastructure destruction completed!"
+          echo ""
+          echo "✅ All resources have been destroyed."
+          echo "💰 No more AWS charges will be incurred."

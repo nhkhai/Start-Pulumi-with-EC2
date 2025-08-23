@@ -1,0 +1,98 @@
+name: Destroy EC2 Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm you want to destroy all resources'
+        required: true
+        type: string
+      stack_name:
+        description: 'Stack to destroy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+
+env:
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  destroy:
+    name: Destroy Infrastructure
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Validate destroy confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]; then
+            echo "❌ Destroy confirmation failed. You must type 'DESTROY' to proceed."
+            exit 1
+          fi
+          echo "✅ Destroy confirmation validated."
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Pulumi CLI
+        uses: pulumi/actions@v5
+
+      - name: Install dependencies
+        working-directory: ./infra
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Show resources to be destroyed
+        working-directory: ./infra
+        run: |
+          echo "🔍 Resources that will be destroyed:"
+          echo ""
+          pulumi stack output --stack ${{ github.event.inputs.stack_name }} || echo "No outputs found"
+          echo ""
+          echo "⚠️  The following resources will be permanently deleted:"
+          echo "  - EC2 Instance"
+          echo "  - S3 Bucket (and all contents)"
+          echo "  - VPC and all networking resources"
+          echo "  - Security Groups"
+          echo "  - IAM Roles and Policies"
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Destroy infrastructure
+        uses: pulumi/actions@v5
+        with:
+          command: destroy
+          stack-name: ${{ github.event.inputs.stack_name }}
+          work-dir: infra
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Confirm destruction
+        run: |
+          echo "🎯 Infrastructure destruction completed successfully!"
+          echo ""
+          echo "✅ All resources for stack '${{ github.event.inputs.stack_name }}' have been destroyed."
+          echo ""
+          echo "📝 Summary:"
+          echo "  - EC2 instance terminated"
+          echo "  - S3 bucket deleted"
+          echo "  - VPC and networking resources removed"
+          echo "  - IAM roles and policies deleted"
+          echo ""
+          echo "💰 No more AWS charges will be incurred for these resources."

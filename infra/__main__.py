@@ -1,27 +1,21 @@
 import pulumi
 import pulumi_aws as aws
-import json # You need to import the json library for IAM policies
 
 # --- Configuration ---
 stack = pulumi.get_stack()
 project_name = pulumi.get_project()
-
-# Assuming you have a Pulumi.<stack>.yaml file with:
-# config:
-#   ll-config:org: my-organization
 config = pulumi.Config('ll-config')
 org = config.require('org')
 
-# --- 1. Create Networking Resources (VPC, Subnet, IGW, etc.) ---
-# This section remains unchanged as it was correctly set up.
+# --- 1. Create VPC and Networking ---
 vpc = aws.ec2.Vpc("app-vpc",
     cidr_block="10.0.0.0/16",
     enable_dns_hostnames=True,
-    tags={ "Name": f"{org}-{stack}-{project_name}-vpc" })
+    tags={"Name": f"{org}-{stack}-{project_name}-vpc"})
 
 internet_gateway = aws.ec2.InternetGateway("app-igw",
     vpc_id=vpc.id,
-    tags={ "Name": f"{org}-{stack}-{project_name}-igw" })
+    tags={"Name": f"{org}-{stack}-{project_name}-igw"})
 
 route_table = aws.ec2.RouteTable("app-rt",
     vpc_id=vpc.id,
@@ -31,29 +25,25 @@ route_table = aws.ec2.RouteTable("app-rt",
             gateway_id=internet_gateway.id,
         ),
     ],
-    tags={ "Name": f"{org}-{stack}-{project_name}-rt" })
+    tags={"Name": f"{org}-{stack}-{project_name}-rt"})
 
 subnet = aws.ec2.Subnet("app-subnet",
     vpc_id=vpc.id,
     cidr_block="10.0.1.0/24",
     map_public_ip_on_launch=True,
-    tags={ "Name": f"{org}-{stack}-{project_name}-subnet" })
+    tags={"Name": f"{org}-{stack}-{project_name}-subnet"})
 
 route_table_association = aws.ec2.RouteTableAssociation("app-rta",
     subnet_id=subnet.id,
     route_table_id=route_table.id)
 
-# --- 2. Create a Security Group ---
-# This section remains unchanged.
+# --- 2. Create Security Group ---
 security_group = aws.ec2.SecurityGroup("web-sg",
-    description="Enable HTTP and SSH access to EC2 instance",
+    description="Allow HTTP access to EC2 instance",
     vpc_id=vpc.id,
     ingress=[
         aws.ec2.SecurityGroupIngressArgs(
-            from_port=22, to_port=22, protocol="tcp", cidr_blocks=["0.0.0.0/0"], description="Allow SSH access",
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=80, to_port=80, protocol="tcp", cidr_blocks=["0.0.0.0/0"], description="Allow HTTP access",
+            from_port=80, to_port=80, protocol="tcp", cidr_blocks=["0.0.0.0/0"],
         ),
     ],
     egress=[
@@ -61,10 +51,9 @@ security_group = aws.ec2.SecurityGroup("web-sg",
             from_port=0, to_port=0, protocol="-1", cidr_blocks=["0.0.0.0/0"],
         ),
     ],
-    tags={ "Name": f"{org}-{stack}-{project_name}-security-group" })
+    tags={"Name": f"{org}-{stack}-{project_name}-security-group"})
 
-# --- 3. Select an Amazon Machine Image (AMI) ---
-# This section remains unchanged.
+# --- 3. Get Latest Amazon Linux AMI ---
 ami = aws.ec2.get_ami(
     most_recent=True,
     owners=["amazon"],
@@ -73,89 +62,66 @@ ami = aws.ec2.get_ami(
         aws.ec2.GetAmiFilterArgs(name="virtualization-type", values=["hvm"]),
     ])
 
-# --- 4. NEW: Create S3 Bucket for Application Code ---
-# This private S3 bucket will store the app.zip artifact uploaded by GitHub Actions.
-app_bucket = aws.s3.Bucket("app-bucket")
-
-# --- 5. NEW: Create IAM Role for the EC2 Instance ---
-# This role grants the EC2 instance the permissions it needs to access other AWS services.
-ec2_role = aws.iam.Role("ec2-role",
-    assume_role_policy=json.dumps({
-        "Version": "2012-10-17",
-        "Statement": [{
-            "Action": "sts:AssumeRole",
-            "Effect": "Allow",
-            "Principal": { "Service": "ec2.amazonaws.com" },
-        }]
-    }))
-
-# Create an IAM policy that grants permissions to read from the S3 bucket
-# and to describe EC2 tags (to get the instance's own 'Name' tag).
-s3_ec2_policy = aws.iam.Policy("s3-ec2-policy",
-    policy=app_bucket.arn.apply(lambda arn: json.dumps({
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Action": ["s3:GetObject"],
-                "Effect": "Allow",
-                "Resource": f"{arn}/*" # Grant read access to all objects in the bucket
-            },
-            {
-                "Action": ["ec2:DescribeTags"], # Grant permission to read tags
-                "Effect": "Allow",
-                "Resource": "*" # Required for describe-tags action
-            }
-        ]
-    })))
-
-# Attach the policy to the role.
-aws.iam.RolePolicyAttachment("ec2-policy-attachment",
-    role=ec2_role.name,
-    policy_arn=s3_ec2_policy.arn)
-
-# Create an instance profile, which is a container for an IAM role that you can
-# use to pass role information to an EC2 instance when the instance starts.
-instance_profile = aws.iam.InstanceProfile("ec2-instance-profile", role=ec2_role.name)
-
-# --- 6. NEW: Define the User Data Bootstrapper Script ---
-# This script runs on the EC2 instance at first boot. Its only job is to download,
-# unzip, and execute the main application setup script from the S3 bucket.
-user_data_bootstrapper = app_bucket.id.apply(
-    lambda bucket_name: f"""#!/bin/bash
+# --- 4. User Data Script ---
+user_data_script = f"""#!/bin/bash
 yum update -y
-yum install -y aws-cli unzip
+yum install -y httpd aws-cli
 
-# Download the application from S3
-aws s3 cp s3://{bucket_name}/app.zip /tmp/app.zip
+# Start Apache
+systemctl start httpd
+systemctl enable httpd
 
-# Unzip and run the setup script from the 'app' directory
-unzip /tmp/app.zip -d /
-chmod +x /app/setup.sh
-/app/setup.sh
+# Get instance metadata  
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
+INSTANCE_TYPE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-type)
+AVAILABILITY_ZONE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+REGION=$(echo $AVAILABILITY_ZONE | sed 's/.$//')
+
+# Create simple HTML page directly
+cat > /var/www/html/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EC2 Instance Info</title>
+    <style>
+        body {{ font-family: Arial; background: #222; color: #eee; padding: 40px; }}
+        .container {{ border: 1px solid #00ff99; padding: 40px; background: #333; border-radius: 12px; }}
+        h1 {{ color: #00ff99; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EC2 Instance Details</h1>
+        <p><b>Instance ID:</b> INSTANCE_ID_PLACEHOLDER</p>
+        <p><b>Instance Type:</b> INSTANCE_TYPE_PLACEHOLDER</p>
+        <p><b>Availability Zone:</b> AVAILABILITY_ZONE_PLACEHOLDER</p>
+        <p><b>Region:</b> REGION_PLACEHOLDER</p>
+    </div>
+</body>
+</html>
+EOF
+
+# Replace placeholders with actual values
+sed -i "s/INSTANCE_ID_PLACEHOLDER/$INSTANCE_ID/g" /var/www/html/index.html
+sed -i "s/INSTANCE_TYPE_PLACEHOLDER/$INSTANCE_TYPE/g" /var/www/html/index.html  
+sed -i "s/AVAILABILITY_ZONE_PLACEHOLDER/$AVAILABILITY_ZONE/g" /var/www/html/index.html
+sed -i "s/REGION_PLACEHOLDER/$REGION/g" /var/www/html/index.html
 """
-)
 
-# --- 7. Create the EC2 Instance (Now with IAM Role and User Data) ---
+# --- 5. Create EC2 Instance ---
 ec2_instance = aws.ec2.Instance("web-server-instance",
     instance_type="t2.micro",
     ami=ami.id,
     subnet_id=subnet.id,
     vpc_security_group_ids=[security_group.id],
-    
-    # MODIFIED: Attach the IAM role and the user data script
-    iam_instance_profile=instance_profile.name,
-    user_data=user_data_bootstrapper,
-    
+    user_data=user_data_script,
     tags={
         "Name": f"{org}-{stack}-{project_name}-instance",
     })
 
 # --- Outputs ---
-# Your original outputs, plus the new S3 bucket name which is essential for the CI/CD workflow.
-pulumi.export("project_name", project_name)
-pulumi.export("stack", stack)
 pulumi.export("instance_id", ec2_instance.id)
 pulumi.export("public_ip", ec2_instance.public_ip)
 pulumi.export("public_dns", ec2_instance.public_dns)
-pulumi.export("security_group_id", security_group.id)
-pulumi.export("s3_bucket_name", app_bucket.id) # <-- CRITICAL for GitHub Actions
+pulumi.export("web_url", ec2_instance.public_ip.apply(lambda ip: f"http://{ip}"))
