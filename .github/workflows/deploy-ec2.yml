@@ -70,9 +70,9 @@ jobs:
               echo "📝 No user data changes detected"
             fi
           else
-            # First deployment - always force replacement
-            echo "userdata_changed=true" >> $GITHUB_OUTPUT
-            echo "🔄 First deployment - will force replacement"
+            # First deployment - normal deployment (no replacement needed)
+            echo "userdata_changed=false" >> $GITHUB_OUTPUT
+            echo "📝 First deployment - normal deployment"
           fi
 
       - name: Deploy infrastructure (with replacement)
@@ -88,7 +88,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
       - name: Deploy infrastructure (normal)
-        if: github.event.inputs.action != 'destroy' && github.event.inputs.force_replace != 'true' && steps.check_userdata.outputs.userdata_changed != 'true'
+        if: github.event.inputs.action != 'destroy' && github.event.inputs.force_replace != 'true' || steps.check_userdata.outputs.userdata_changed != 'true'
         uses: pulumi/actions@v5
         with:
           command: up
