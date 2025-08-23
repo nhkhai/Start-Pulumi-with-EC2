@@ -14,6 +14,11 @@ on:
         options:
         - deploy
         - destroy
+      force_replace:
+        description: 'Force replace EC2 instance (needed for user_data changes)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   AWS_REGION: ap-southeast-1
@@ -50,6 +55,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Check if user_data changed
+        id: check_userdata
+        run: |
+          if git diff HEAD~1 --name-only | grep -q "infra/__main__.py"; then
+            if git diff HEAD~1 infra/__main__.py | grep -q "user_data_script\|cat > /var/www/html"; then
+              echo "userdata_changed=true" >> $GITHUB_OUTPUT
+              echo "🔄 User data script changes detected - will force instance replacement"
+            else
+              echo "userdata_changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "userdata_changed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy infrastructure
         if: github.event.inputs.action != 'destroy'
         uses: pulumi/actions@v5
@@ -58,6 +77,7 @@ jobs:
           stack-name: dev
           work-dir: infra
           refresh: true
+          replace: ${{ (github.event.inputs.force_replace == 'true' || steps.check_userdata.outputs.userdata_changed == 'true') && 'urn:pulumi:dev::web-server::aws:ec2/instance:Instance::web-server-instance' || '' }}
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 

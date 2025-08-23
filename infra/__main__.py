@@ -9,6 +9,9 @@ org = config.require('org')
 github_org = config.require('githubOrg')
 pulumi_org = config.require('pulumiOrg')
 
+aws_config = pulumi.Config('aws')
+aws_environment = aws_config.require_object('defaultTags')['tags']['Environment']
+
 # --- 1. Create VPC and Networking ---
 vpc = aws.ec2.Vpc("app-vpc",
     cidr_block="10.0.0.0/16",
@@ -80,8 +83,6 @@ INSTANCE_TYPE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169
 AVAILABILITY_ZONE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
 REGION=$(echo $AVAILABILITY_ZONE | sed 's/.$//')
 
-# Get current Git branch (if available from deployment context)
-GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "not-available")
 
 # Create simple HTML page directly
 cat > /var/www/html/index.html << 'EOF'
@@ -117,16 +118,18 @@ cat > /var/www/html/index.html << 'EOF'
         <h3>1. Project Details</h3>
         <p><b>Project Name:</b> <span class="highlight">PROJECT_NAME_PLACEHOLDER</span></p>
         <p><b>Stack:</b> <span class="highlight">STACK_PLACEHOLDER</span></p>
-        <p><b>Environment:</b> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></p>
         
-        <h3>2. Resource Naming & Organization</h3>
+        <h3>2. Resource Naming & Tags</h3>
         <p><b>AWS Resource Prefix:</b> <span class="highlight">ORG_PLACEHOLDER</span></p>
+        <p><b>Tags Applied:</b></p>
+        <ul>
+            <li><b>Environment:</b> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></li>
+        </ul>
+        <small>Example: This VPC is named "ORG_PLACEHOLDER-STACK_PLACEHOLDER-PROJECT_NAME_PLACEHOLDER-vpc" and tagged with Environment=ENVIRONMENT_PLACEHOLDER</small>
         
         <h3>3. Source & Deployment Tracking</h3>
-        <p><b>Git Repository:</b> <span class="highlight">GIT_REPO_PLACEHOLDER</span></p>
-        <p><b>Git Branch:</b> <span class="highlight">GIT_BRANCH_PLACEHOLDER</span></p>
-        <p><b>GitHub User:</b> <span class="highlight">GITHUB_ORG_PLACEHOLDER</span></p>
-        <p><b>Pulumi Organization:</b> <span class="highlight">PULUMI_ORG_PLACEHOLDER</span></p>
+        <p><b>GitHub Org:</b> <span class="highlight">GITHUB_ORG_PLACEHOLDER</span></p>
+        <p><b>Pulumi Org:</b> <span class="highlight">PULUMI_ORG_PLACEHOLDER</span></p>
         <p><b>Managed By:</b> <span class="highlight">Pulumi</span></p>
     </div>
 </body>
@@ -143,9 +146,7 @@ sed -i "s/STACK_PLACEHOLDER/{stack}/g" /var/www/html/index.html
 sed -i "s/ORG_PLACEHOLDER/{org}/g" /var/www/html/index.html
 sed -i "s/GITHUB_ORG_PLACEHOLDER/{github_org}/g" /var/www/html/index.html
 sed -i "s/PULUMI_ORG_PLACEHOLDER/{pulumi_org}/g" /var/www/html/index.html
-sed -i "s/GIT_REPO_PLACEHOLDER/web-server/g" /var/www/html/index.html
-sed -i "s/GIT_BRANCH_PLACEHOLDER/$GIT_BRANCH/g" /var/www/html/index.html
-sed -i "s/ENVIRONMENT_PLACEHOLDER/stag/g" /var/www/html/index.html
+sed -i "s/ENVIRONMENT_PLACEHOLDER/{aws_environment}/g" /var/www/html/index.html
 """
 
 # --- 5. Create EC2 Instance ---
