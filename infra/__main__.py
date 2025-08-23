@@ -87,6 +87,16 @@ INSTANCE_TYPE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169
 AVAILABILITY_ZONE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
 REGION=$(echo $AVAILABILITY_ZONE | sed 's/.$//')
 
+# Set Pulumi configuration values
+PROJECT_NAME="{project_name}"
+STACK="{stack}"
+ORG="{org}"
+GITHUB_ORG="{github_org}"
+PULUMI_ORG="{pulumi_org}"
+ENVIRONMENT="{aws_environment}"
+MANAGED_BY="{aws_managed_by}"
+GIT_REPO="{aws_git_repo}"
+
 
 # Create simple HTML page directly
 cat > /var/www/html/index.html << 'EOF'
@@ -151,10 +161,9 @@ sed -i "s/STACK_PLACEHOLDER/{stack}/g" /var/www/html/index.html
 sed -i "s/ORG_PLACEHOLDER/{org}/g" /var/www/html/index.html
 sed -i "s/GITHUB_ORG_PLACEHOLDER/{github_org}/g" /var/www/html/index.html
 sed -i "s/PULUMI_ORG_PLACEHOLDER/{pulumi_org}/g" /var/www/html/index.html
-
+sed -i "s/GIT_REPO_PLACEHOLDER/Start-Pulumi-with-EC2/g" /var/www/html/index.html
+sed -i "s/GIT_BRANCH_PLACEHOLDER/$GIT_BRANCH/g" /var/www/html/index.html
 sed -i "s/ENVIRONMENT_PLACEHOLDER/{aws_environment}/g" /var/www/html/index.html
-sed -i "s/MANAGED_BY_PLACEHOLDER/{aws_managed_by}/g" /var/www/html/index.html
-sed -i "s/GIT_REPO_PLACEHOLDER/{aws_git_repo}/g" /var/www/html/index.html
 """
 
 # --- 5. Create EC2 Instance ---

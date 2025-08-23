@@ -33,6 +33,8 @@ config:
   aws:defaultTags:
     tags: 
       Environment: dev 
+      ManagedBy: Pulumi
+      GitRepo: Start-Pulumi-with-EC2
 ```
 
 **To this:**
@@ -42,6 +44,8 @@ config:
   aws:defaultTags:
     tags: 
       Environment: workshop          # Updated environment
+      ManagedBy: Pulumi
+      GitRepo: Start-Pulumi-with-EC2
 
 ```
 

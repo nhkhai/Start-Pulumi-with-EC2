@@ -34,6 +34,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with: 
+            fetch-depth: 2 # git diff: if __main__.py is the same, no replacement needed
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -69,15 +71,26 @@ jobs:
             echo "userdata_changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Deploy infrastructure
-        if: github.event.inputs.action != 'destroy'
+      - name: Deploy infrastructure (with replacement)
+        if: github.event.inputs.action != 'destroy' && (github.event.inputs.force_replace == 'true' || steps.check_userdata.outputs.userdata_changed == 'true')
         uses: pulumi/actions@v5
         with:
           command: up
           stack-name: dev
           work-dir: infra
           refresh: true
-          replace: ${{ (github.event.inputs.force_replace == 'true' || steps.check_userdata.outputs.userdata_changed == 'true') && 'urn:pulumi:dev::web-server::aws:ec2/instance:Instance::web-server-instance' || '' }}
+          replace: urn:pulumi:dev::Start-Pulumi-with-EC2::aws:ec2/instance:Instance::web-server-instance
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Deploy infrastructure (normal)
+        if: github.event.inputs.action != 'destroy' && github.event.inputs.force_replace != 'true' && steps.check_userdata.outputs.userdata_changed != 'true'
+        uses: pulumi/actions@v5
+        with:
+          command: up
+          stack-name: dev
+          work-dir: infra
+          refresh: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
