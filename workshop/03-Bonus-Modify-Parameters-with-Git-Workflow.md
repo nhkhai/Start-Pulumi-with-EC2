@@ -83,129 +83,208 @@ Once deployment completes:
 
 ## More Changes to Try: Make the Webpage More Pretty
 
-Edit `infra/__main__.py` and replace the HTML section (around line 82):
-
+Edit `infra/__main__.py` and replace the HTML section (around line 101):
 ```python
 cat > /var/www/html/index.html << 'EOF'
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🚀 My Awesome Pulumi Server</title>
+    <title>🚀 Beautiful Pulumi EC2 Dashboard</title>
     <style>
-        body { 
+        body {{ 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; 
-            padding: 0;
+            padding: 20px;
             margin: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container { 
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 50px; 
-            border-radius: 25px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }}
+        .header {{
             text-align: center;
-            max-width: 700px;
-            animation: fadeIn 1s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h1 { 
+            margin-bottom: 30px;
+        }}
+        .main-title {{
             color: #00ff99; 
             font-size: 3em;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
             animation: glow 2s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from { text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 0 0 20px #00ff99; }
-            to { text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 0 0 30px #00ff99, 0 0 40px #00ff99; }
-        }
-        .info-grid {
+        }}
+        @keyframes glow {{
+            from {{ text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 0 0 20px #00ff99; }}
+            to {{ text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 0 0 30px #00ff99, 0 0 40px #00ff99; }}
+        }}
+        .container {{ 
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid #00ff99; 
+            padding: 40px; 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 20px; 
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in;
+        }}
+        .pulumi-container {{ 
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid #ff6b35; 
+            padding: 40px; 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 20px;
+            animation: fadeIn 1.5s ease-in;
+        }}
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(30px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        h1 {{ color: #00ff99; font-size: 2.2em; text-align: center; }}
+        h2 {{ color: #ff6b35; font-size: 2em; text-align: center; }}
+        h3 {{ 
+            color: #00ff99; 
+            margin-top: 25px; 
+            margin-bottom: 15px; 
+            border-bottom: 2px solid rgba(0,255,153,0.3); 
+            padding-bottom: 8px;
+            font-size: 1.3em;
+        }}
+        .highlight {{ 
+            color: #00ff99; 
+            font-weight: bold; 
+            background: rgba(0,255,153,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }}
+        .info-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 40px 0;
-        }
-        .info-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-            padding: 25px;
-            border-radius: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }}
+        .info-item {{
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .info-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,255,153,0.2);
-        }
-        .info-label {
-            font-weight: bold;
-            color: #00ff99;
-            font-size: 1.2em;
-            margin-bottom: 8px;
-        }
-        .info-value {
-            font-size: 1.1em;
-            word-break: break-all;
-            opacity: 0.9;
-        }
-        .badges {
-            margin: 40px 0;
-        }
-        .badge {
+        }}
+        .info-item:hover {{
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,255,153,0.2);
+        }}
+        .tag-list {{
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }}
+        .tag-list ul {{
+            margin: 10px 0;
+            padding-left: 20px;
+        }}
+        .tag-list li {{
+            margin: 8px 0;
+            padding: 5px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            list-style-type: none;
+            position: relative;
+            padding-left: 30px;
+        }}
+        .tag-list li:before {{
+            content: "🏷️";
+            position: absolute;
+            left: 8px;
+        }}
+        .example-text {{
+            background: rgba(255,107,53,0.1);
+            border: 1px solid rgba(255,107,53,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-style: italic;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }}
+        .badges {{
+            text-align: center;
+            margin: 30px 0;
+        }}
+        .badge {{
             display: inline-block;
             background: linear-gradient(45deg, #00ff99, #00cc7a);
             color: #222;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 25px;
             font-weight: bold;
-            margin: 8px;
-            box-shadow: 0 5px 15px rgba(0,255,153,0.3);
+            margin: 5px;
+            box-shadow: 0 4px 12px rgba(0,255,153,0.3);
             transition: transform 0.2s ease;
-        }
-        .badge:hover {
+        }}
+        .badge:hover {{
             transform: scale(1.05);
-        }
-        .footer {
-            margin-top: 40px;
-            font-style: italic;
-            opacity: 0.8;
-            font-size: 1.1em;
-        }
-        .emoji {
-            font-size: 1.5em;
-            margin: 0 5px;
-        }
+        }}
+        small {{ color: #bbb; font-style: italic; }}
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1 class="main-title">🚀 Beautiful Pulumi Dashboard</h1>
+    </div>
+
+    <!-- EC2 Instance Information -->
     <div class="container">
-        <h1>🚀 My Awesome Pulumi Server</h1>
-        
+        <h1>🖥️ EC2 Instance Information</h1>
         <div class="info-grid">
-            <div class="info-card">
-                <div class="info-label">🆔 Instance ID</div>
-                <div class="info-value">INSTANCE_ID_PLACEHOLDER</div>
+            <div class="info-item">
+                <p><b>Instance ID:</b> <span class="highlight">INSTANCE_ID_PLACEHOLDER</span></p>
             </div>
-            <div class="info-card">
-                <div class="info-label">💻 Server Type</div>
-                <div class="info-value">INSTANCE_TYPE_PLACEHOLDER</div>
+            <div class="info-item">
+                <p><b>Instance Type:</b> <span class="highlight">INSTANCE_TYPE_PLACEHOLDER</span></p>
             </div>
-            <div class="info-card">
-                <div class="info-label">📍 Location</div>
-                <div class="info-value">AVAILABILITY_ZONE_PLACEHOLDER</div>
+            <div class="info-item">
+                <p><b>Availability Zone:</b> <span class="highlight">AVAILABILITY_ZONE_PLACEHOLDER</span></p>
             </div>
-            <div class="info-card">
-                <div class="info-label">🌎 Region</div>
-                <div class="info-value">REGION_PLACEHOLDER</div>
+            <div class="info-item">
+                <p><b>Region:</b> <span class="highlight">REGION_PLACEHOLDER</span></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pulumi Deployment Information -->
+    <div class="pulumi-container">
+        <h2>⚡ Pulumi Deployment Information</h2>
+        
+        <h3>1. Project Details</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <p><b>Project Name:</b> <span class="highlight">PROJECT_NAME_PLACEHOLDER</span></p>
+            </div>
+            <div class="info-item">
+                <p><b>Stack:</b> <span class="highlight">STACK_PLACEHOLDER</span></p>
+            </div>
+        </div>
+        
+        <h3>2. Resource Naming & Tags</h3>
+        <p><b>AWS Resource Prefix:</b> <span class="highlight">ORG_PLACEHOLDER</span></p>
+        
+        <div class="tag-list">
+            <p><b>Tags Applied to All Resources:</b></p>
+            <ul>
+                <li><b>Environment:</b> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></li>
+                <li><b>ManagedBy:</b> <span class="highlight">MANAGED_BY_PLACEHOLDER</span></li>
+                <li><b>GitRepo:</b> <span class="highlight">GIT_REPO_PLACEHOLDER</span></li>
+            </ul>
+            <div class="example-text">
+                <small>💡 Example: This VPC is named "<span class="highlight">ORG_PLACEHOLDER-STACK_PLACEHOLDER-PROJECT_NAME_PLACEHOLDER-vpc</span>" and tagged with Environment=<span class="highlight">ENVIRONMENT_PLACEHOLDER</span></small>
+            </div>
+        </div>
+        
+        <h3>3. Source & Deployment Tracking</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <p><b>GitHub Org:</b> <span class="highlight">GITHUB_ORG_PLACEHOLDER</span></p>
+            </div>
+            <div class="info-item">
+                <p><b>Pulumi Org:</b> <span class="highlight">PULUMI_ORG_PLACEHOLDER</span></p>
             </div>
         </div>
 
@@ -215,10 +294,10 @@ cat > /var/www/html/index.html << 'EOF'
             <span class="badge">🔄 Git Workflow</span>
         </div>
 
-        <div class="footer">
-            <p><span class="emoji">🎯</span> This entire server was created with Python code!</p>
-            <p><span class="emoji">🚀</span> Changes deployed automatically via Git push</p>
-            <p><span class="emoji">💰</span> Can be destroyed with one command - no surprise bills!</p>
+        <div style="text-align: center; margin-top: 30px; opacity: 0.8;">
+            <p>🎯 This entire server was created with Python code!</p>
+            <p>🚀 Changes deployed automatically via Git push</p>
+            <p>💰 Can be destroyed with one command - no surprise bills!</p>
         </div>
     </div>
 </body>
