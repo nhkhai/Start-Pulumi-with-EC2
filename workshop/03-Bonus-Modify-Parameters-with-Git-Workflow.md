@@ -10,7 +10,7 @@ Now let's modify your infrastructure and redeploy using Git workflow. This shows
 
 ## Step 1: Upgrade Server Size
 
-Edit `infra/__main__.py` around line 113:
+Edit `infra/__main__.py` around line 154:
 
 **Change this:**
 ```python
@@ -32,9 +32,7 @@ config:
   aws:region: ap-southeast-1
   aws:defaultTags:
     tags: 
-      Environment: stag 
-      GitRepo: web-server 
-      ManagedBy: Pulumi 
+      Environment: dev 
 ```
 
 **To this:**
@@ -44,10 +42,7 @@ config:
   aws:defaultTags:
     tags: 
       Environment: workshop          # Updated environment
-      GitRepo: pulumi-ec2-demo      # Updated repo name
-      ManagedBy: Pulumi
-      Workshop: "EC2-Demo"          # New tag
-      CreatedBy: "YourName"         # New tag
+
 ```
 
 ## Step 3: Deploy via Git Workflow

@@ -8,9 +8,13 @@ config = pulumi.Config('workshop-config')
 org = config.require('org')
 github_org = config.require('githubOrg')
 pulumi_org = config.require('pulumiOrg')
+print(f'github_org: {github_org}')
+print(f'pulumi_org: {pulumi_org}')
 
 aws_config = pulumi.Config('aws')
 aws_environment = aws_config.require_object('defaultTags')['tags']['Environment']
+aws_managed_by = aws_config.require_object('defaultTags')['tags']['ManagedBy']
+aws_git_repo = aws_config.require_object('defaultTags')['tags']['GitRepo']
 
 # --- 1. Create VPC and Networking ---
 vpc = aws.ec2.Vpc("app-vpc",
@@ -124,13 +128,14 @@ cat > /var/www/html/index.html << 'EOF'
         <p><b>Tags Applied:</b></p>
         <ul>
             <li><b>Environment:</b> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></li>
+            <li><b>ManagedBy:</b> <span class="highlight">MANAGED_BY_PLACEHOLDER</span></li>
+            <li><b>GitRepo:</b> <span class="highlight">GIT_REPO_PLACEHOLDER</span></li>
         </ul>
         <small>Example: This VPC is named "ORG_PLACEHOLDER-STACK_PLACEHOLDER-PROJECT_NAME_PLACEHOLDER-vpc" and tagged with Environment=ENVIRONMENT_PLACEHOLDER</small>
         
         <h3>3. Source & Deployment Tracking</h3>
         <p><b>GitHub Org:</b> <span class="highlight">GITHUB_ORG_PLACEHOLDER</span></p>
         <p><b>Pulumi Org:</b> <span class="highlight">PULUMI_ORG_PLACEHOLDER</span></p>
-        <p><b>Managed By:</b> <span class="highlight">Pulumi</span></p>
     </div>
 </body>
 </html>
@@ -146,7 +151,10 @@ sed -i "s/STACK_PLACEHOLDER/{stack}/g" /var/www/html/index.html
 sed -i "s/ORG_PLACEHOLDER/{org}/g" /var/www/html/index.html
 sed -i "s/GITHUB_ORG_PLACEHOLDER/{github_org}/g" /var/www/html/index.html
 sed -i "s/PULUMI_ORG_PLACEHOLDER/{pulumi_org}/g" /var/www/html/index.html
+
 sed -i "s/ENVIRONMENT_PLACEHOLDER/{aws_environment}/g" /var/www/html/index.html
+sed -i "s/MANAGED_BY_PLACEHOLDER/{aws_managed_by}/g" /var/www/html/index.html
+sed -i "s/GIT_REPO_PLACEHOLDER/{aws_git_repo}/g" /var/www/html/index.html
 """
 
 # --- 5. Create EC2 Instance ---

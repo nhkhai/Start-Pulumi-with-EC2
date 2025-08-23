@@ -3,11 +3,11 @@ config:
   aws:defaultTags:
     tags: 
       Environment: dev 
-      GitRepo: web-server 
-      ManagedBy: Pulumi 
-  workshop-config:githubOrg: workshop-github-org  # just a label
+      ManagedBy: Pulumi
+      GitRepo: Start-Pulumi-with-EC2
+  workshop-config:githubOrg: this-is-github-org   # just a label
   workshop-config:org: workshop-resources-org # in aws account resources will be named as workshop-resources-org-dev-web-server-vpc
-  workshop-config:pulumiOrg: workshop-pulumi-org  # just a label
+  workshop-config:pulumiOrg: this-is-pulumi-org  # just a label
 
   # workshop-config: namespace 
 
