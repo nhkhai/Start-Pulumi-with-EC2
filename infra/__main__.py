@@ -4,12 +4,11 @@ import pulumi_aws as aws
 # --- Configuration ---
 stack = pulumi.get_stack() # pulumi.dev
 project_name = pulumi.get_project() # from Pulumi.yaml: name: Start-Pulumi-with-EC2
+
 config = pulumi.Config('workshop-config')
 org = config.require('org')
 github_org = config.require('githubOrg')
 pulumi_org = config.require('pulumiOrg')
-print(f'github_org: {github_org}')
-print(f'pulumi_org: {pulumi_org}')
 
 aws_config = pulumi.Config('aws')
 aws_environment = aws_config.require_object('defaultTags')['tags']['Environment']
@@ -156,14 +155,17 @@ sed -i "s/INSTANCE_ID_PLACEHOLDER/$INSTANCE_ID/g" /var/www/html/index.html
 sed -i "s/INSTANCE_TYPE_PLACEHOLDER/$INSTANCE_TYPE/g" /var/www/html/index.html  
 sed -i "s/AVAILABILITY_ZONE_PLACEHOLDER/$AVAILABILITY_ZONE/g" /var/www/html/index.html
 sed -i "s/REGION_PLACEHOLDER/$REGION/g" /var/www/html/index.html
+
 sed -i "s/PROJECT_NAME_PLACEHOLDER/{project_name}/g" /var/www/html/index.html
 sed -i "s/STACK_PLACEHOLDER/{stack}/g" /var/www/html/index.html
+
 sed -i "s/ORG_PLACEHOLDER/{org}/g" /var/www/html/index.html
+sed -i "s/ENVIRONMENT_PLACEHOLDER/{aws_environment}/g" /var/www/html/index.html
+sed -i "s/GIT_REPO_PLACEHOLDER/{aws_git_repo}/g" /var/www/html/index.html
+sed -i "s/MANAGED_BY_PLACEHOLDER/{aws_managed_by}/g" /var/www/html/index.html
+
 sed -i "s/GITHUB_ORG_PLACEHOLDER/{github_org}/g" /var/www/html/index.html
 sed -i "s/PULUMI_ORG_PLACEHOLDER/{pulumi_org}/g" /var/www/html/index.html
-sed -i "s/GIT_REPO_PLACEHOLDER/Start-Pulumi-with-EC2/g" /var/www/html/index.html
-sed -i "s/GIT_BRANCH_PLACEHOLDER/$GIT_BRANCH/g" /var/www/html/index.html
-sed -i "s/ENVIRONMENT_PLACEHOLDER/{aws_environment}/g" /var/www/html/index.html
 """
 
 # --- 5. Create EC2 Instance ---
@@ -178,6 +180,8 @@ ec2_instance = aws.ec2.Instance("web-server-instance",
     })
 
 # --- Outputs ---
+pulumi.export("github_org", github_org)
+pulumi.export("pulumi_org", pulumi_org)
 pulumi.export("instance_id", ec2_instance.id)
 pulumi.export("public_ip", ec2_instance.public_ip)
 pulumi.export("public_dns", ec2_instance.public_dns)

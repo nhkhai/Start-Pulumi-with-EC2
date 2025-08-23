@@ -60,15 +60,19 @@ jobs:
       - name: Check if user_data changed
         id: check_userdata
         run: |
-          if git diff HEAD~1 --name-only | grep -q "infra/__main__.py"; then
-            if git diff HEAD~1 infra/__main__.py | grep -q "user_data_script\|cat > /var/www/html"; then
+          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            # Check if user_data/HTML content changed
+            if git diff HEAD~1 infra/__main__.py | grep -q "user_data_script\|cat > /var/www/html\|sed -i.*html\|<html>\|<style>"; then
               echo "userdata_changed=true" >> $GITHUB_OUTPUT
-              echo "🔄 User data script changes detected - will force instance replacement"
+              echo "🔄 User data/HTML changes detected - will force replacement"
             else
               echo "userdata_changed=false" >> $GITHUB_OUTPUT
+              echo "📝 No user data changes detected"
             fi
           else
-            echo "userdata_changed=false" >> $GITHUB_OUTPUT
+            # First deployment - always force replacement
+            echo "userdata_changed=true" >> $GITHUB_OUTPUT
+            echo "🔄 First deployment - will force replacement"
           fi
 
       - name: Deploy infrastructure (with replacement)
