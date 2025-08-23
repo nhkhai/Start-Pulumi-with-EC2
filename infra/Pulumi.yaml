@@ -1,4 +1,4 @@
-name: web-server
+name: Start-Pulumi-with-EC2 # pulumi.get_project()
 description: NA
 runtime:
   name: python
