@@ -1,71 +1,53 @@
-# Simple EC2 Web App with Pulumi
+# Pulumi Workshop - Build AWS Infrastructure with Code
 
-This project deploys a simple web application to an AWS EC2 instance using Pulumi.
+Learn Infrastructure as Code by building a real web server on AWS!
 
-## What it does
+## What You Need
 
-- Creates an EC2 instance with a web server
-- Displays instance information on a web page
-- All resources can be destroyed with `pulumi destroy`
+- AWS Account (free tier OK)
+- GitHub Account  
+- 90 minutes
+## Workshop Parts
 
-## Project Structure
+### Workshop Flow
 
 ```
-├── .github/workflows/
-│   ├── deploy-ec2.yml               # Main deploy/destroy workflow
-│   └── destroy-ec2.yml              # Dedicated destroy workflow  
-├── infra/
-│   ├── __main__.py                  # Pulumi infrastructure code
-│   ├── Pulumi.yaml                  # Project config
-│   ├── Pulumi.dev.yaml              # Dev environment config
-│   └── requirements.txt             # Python dependencies
-└── README.md
+Learn Pulumi → Setup AWS → Deploy Infrastructure → Visit Website → Make Changes → Redeploy → Clean Up
 ```
 
-## Required GitHub Secrets
+### 📖 [Part 1: What is Pulumi?](./workshop/01-Introduction-to-Pulumi.md)
+**20 minutes** - Why use code instead of clicking in AWS console?
 
-Set these in your GitHub repository settings:
+### 🛠️ [Part 2: Setup and Deploy](./workshop/02-Setup-and-Deploy-Guide.md) 
+**40 minutes** - Create AWS role, deploy your first infrastructure
 
-- `AWS_ROLE_ARN`: Your AWS IAM role for GitHub Actions
-- `PULUMI_ACCESS_TOKEN`: Your Pulumi access token
+### 🚀 [Part 3: Make Changes](./workshop/03-Bonus-Modify-Parameters-with-Git-Workflow.md)
+**30 minutes** - Upgrade your server, push changes via Git
 
-## Deploy
 
-1. Push to the `dev` branch
-2. GitHub Actions will automatically deploy
-3. Access your web app at the provided URL
 
-## Destroy
+## What You'll Build
 
-You have multiple options to destroy all resources:
+By the end, you'll have:
+- ✅ Web server running on AWS
+- ✅ Complete network setup (VPC, security, etc.)
+- ✅ Automated deployment via GitHub
+- ✅ Ability to change and redeploy easily
 
-### Option 1: GitHub Actions (Recommended)
-1. Go to **Actions** tab in your GitHub repository
-2. Click **"Deploy EC2 App"** workflow
-3. Click **"Run workflow"**
-4. Select **"destroy"** from the action dropdown
-5. Click **"Run workflow"** → All resources will be destroyed
 
-### Option 2: Dedicated Destroy Workflow
-1. Go to **Actions** tab in your GitHub repository  
-2. Click **"Destroy EC2 Infrastructure"** workflow
-3. Click **"Run workflow"**
-4. Type **"DESTROY"** in the confirmation field
-5. Select the stack (dev)
-6. Click **"Run workflow"** → All resources will be destroyed
 
-### Option 3: Local Command
-```bash
-cd infra
-pulumi destroy --stack dev
-```
 
-## Local Development
+## Key Learning
 
-```bash
-cd infra
-pip install -r requirements.txt
-pulumi up --stack dev
-```
+**Before:** Click around AWS console, hope you remember what you created, surprise bills
 
-That's it! Keep it simple. 🚀
+**After:** Write code once, deploy/destroy anytime, share with team, never forget resources
+
+## Important Notes
+
+- 💰 **Always run `pulumi destroy` when done** to avoid charges
+- 🔒 This creates real AWS resources (small cost if you forget cleanup)
+- 👥 Work in pairs for better troubleshooting
+- ❓ Ask questions - Infrastructure as Code is powerful but has a learning curve
+
+Ready to start? → [What is Pulumi?](./workshop/01-Introduction-to-Pulumi.md) 🚀
