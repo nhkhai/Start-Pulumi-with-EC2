@@ -57,26 +57,52 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check if user_data changed
-        id: check_userdata
+      - name: Check if instance exists
+        id: check_instance
         run: |
-          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            # Check if user_data/HTML content changed
-            if git diff HEAD~1 infra/__main__.py | grep -q "user_data_script\|cat > /var/www/html\|sed -i.*html\|<html>\|<style>"; then
-              echo "userdata_changed=true" >> $GITHUB_OUTPUT
-              echo "🔄 User data/HTML changes detected - will force replacement"
+          # Check if instance exists in Pulumi state and AWS
+          INSTANCE_ID=$(pulumi stack output instance_id --stack dev 2>/dev/null | tr -d '"')
+          if [ -n "$INSTANCE_ID" ] && [ "$INSTANCE_ID" != "undefined" ]; then
+            # Check if instance actually exists and is running in AWS
+            if aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].State.Name' --output text 2>/dev/null | grep -q "running\|pending\|stopping\|stopped"; then
+              echo "instance_exists=true" >> $GITHUB_OUTPUT
+              echo "📝 Instance exists - replacement possible"
             else
-              echo "userdata_changed=false" >> $GITHUB_OUTPUT
-              echo "📝 No user data changes detected"
+              echo "instance_exists=false" >> $GITHUB_OUTPUT
+              echo "📝 Instance not found - normal deployment"
             fi
           else
-            # First deployment - normal deployment (no replacement needed)
-            echo "userdata_changed=false" >> $GITHUB_OUTPUT
-            echo "📝 First deployment - normal deployment"
+            echo "instance_exists=false" >> $GITHUB_OUTPUT
+            echo "📝 No instance - normal deployment"
+          fi
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Check if replacement needed
+        id: check_replacement
+        run: |
+          # Check if force replace is requested
+          if [ "${{ github.event.inputs.force_replace }}" = "true" ]; then
+            echo "replacement_needed=true" >> $GITHUB_OUTPUT
+            echo "🔄 Force replace requested"
+          else
+            # Check if user_data/HTML content changed
+            if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+              if git diff HEAD~1 infra/__main__.py | grep -q "user_data_script\|cat > /var/www/html\|sed -i.*html\|<html>\|<style>"; then
+                echo "replacement_needed=true" >> $GITHUB_OUTPUT
+                echo "🔄 User data/HTML changes detected"
+              else
+                echo "replacement_needed=false" >> $GITHUB_OUTPUT
+                echo "📝 No user data changes"
+              fi
+            else
+              echo "replacement_needed=false" >> $GITHUB_OUTPUT
+              echo "📝 First deployment"
+            fi
           fi
 
       - name: Deploy infrastructure (with replacement)
-        if: github.event.inputs.action != 'destroy' && (github.event.inputs.force_replace == 'true' || steps.check_userdata.outputs.userdata_changed == 'true')
+        if: github.event.inputs.action != 'destroy' && steps.check_instance.outputs.instance_exists == 'true' && steps.check_replacement.outputs.replacement_needed == 'true'
         uses: pulumi/actions@v5
         with:
           command: up
@@ -88,7 +114,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
       - name: Deploy infrastructure (normal)
-        if: github.event.inputs.action != 'destroy' && github.event.inputs.force_replace != 'true' || steps.check_userdata.outputs.userdata_changed != 'true'
+        if: github.event.inputs.action != 'destroy' && (steps.check_instance.outputs.instance_exists == 'false' || steps.check_replacement.outputs.replacement_needed == 'false')
         uses: pulumi/actions@v5
         with:
           command: up
