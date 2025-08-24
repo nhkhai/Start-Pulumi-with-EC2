@@ -90,8 +90,6 @@ REGION=$(echo $AVAILABILITY_ZONE | sed 's/.$//')
 PROJECT_NAME="{project_name}"
 STACK="{stack}"
 ORG="{org}"
-GITHUB_ORG="{github_org}"
-PULUMI_ORG="{pulumi_org}"
 ENVIRONMENT="{aws_environment}"
 MANAGED_BY="{aws_managed_by}"
 GIT_REPO="{aws_git_repo}"
@@ -142,9 +140,6 @@ cat > /var/www/html/index.html << 'EOF'
         </ul>
         <small>Example: This VPC is named "ORG_PLACEHOLDER-STACK_PLACEHOLDER-PROJECT_NAME_PLACEHOLDER-vpc" and tagged with Environment=ENVIRONMENT_PLACEHOLDER</small>
         
-        <h3>3. Source & Deployment Tracking</h3>
-        <p><b>GitHub Org:</b> <span class="highlight">GITHUB_ORG_PLACEHOLDER</span></p>
-        <p><b>Pulumi Org:</b> <span class="highlight">PULUMI_ORG_PLACEHOLDER</span></p>
     </div>
 </body>
 </html>
@@ -163,8 +158,6 @@ sed -i "s/ORG_PLACEHOLDER/$ORG/g" /var/www/html/index.html
 sed -i "s/ENVIRONMENT_PLACEHOLDER/$ENVIRONMENT/g" /var/www/html/index.html
 sed -i "s/GIT_REPO_PLACEHOLDER/$GIT_REPO/g" /var/www/html/index.html
 sed -i "s/MANAGED_BY_PLACEHOLDER/$MANAGED_BY/g" /var/www/html/index.html
-sed -i "s/GITHUB_ORG_PLACEHOLDER/$GITHUB_ORG/g" /var/www/html/index.html
-sed -i "s/PULUMI_ORG_PLACEHOLDER/$PULUMI_ORG/g" /var/www/html/index.html
 """
 
 # --- 5. Create EC2 Instance ---
