@@ -146,6 +146,7 @@ cat > /var/www/html/index.html << 'EOF'
 EOF
 
 
+
 # Replace placeholders with actual values
 sed -i "s/INSTANCE_ID_PLACEHOLDER/$INSTANCE_ID/g" /var/www/html/index.html
 sed -i "s/INSTANCE_TYPE_PLACEHOLDER/$INSTANCE_TYPE/g" /var/www/html/index.html  

@@ -67,16 +67,9 @@ jobs:
           INSTANCE_ID=$(pulumi stack output instance_id 2>/dev/null | tr -d '"')
           echo "📋 Instance ID from Pulumi: '$INSTANCE_ID'"
           
-          if [ -n "$INSTANCE_ID" ] && [ "$INSTANCE_ID" != "undefined" ] && [ "$INSTANCE_ID" != "null" ]; then
-            echo "🔍 Checking if instance exists in AWS..."
-            # Check if instance actually exists and is running in AWS
-            if aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].State.Name' --output text 2>/dev/null | grep -q "running\|pending\|stopping\|stopped"; then
+          if [ -n "$INSTANCE_ID" ] && [ "$INSTANCE_ID" != "undefined" ] && [ "$INSTANCE_ID" != "null" ]; then 
               echo "instance_exists=true" >> $GITHUB_OUTPUT
               echo "📝 Instance exists - replacement possible"
-            else
-              echo "instance_exists=false" >> $GITHUB_OUTPUT
-              echo "📝 Instance not found in AWS - normal deployment"
-            fi
           else
             echo "instance_exists=false" >> $GITHUB_OUTPUT
             echo "📝 No instance ID in Pulumi state - normal deployment"

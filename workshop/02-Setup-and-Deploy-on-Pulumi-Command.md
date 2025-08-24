@@ -45,7 +45,7 @@ cd Start-Pulumi-with-EC2
 ### Create Role
 1. IAM → Roles → Create Role
 2. Select "Web identity" 
-3. Choose "GitHub" as provider
+3. Choose "GitHub" as identity provider (if GitHub isn't available as an option, select "Custom trust policy" last step)
 4. Set trust policy:
 
 ```json
@@ -76,8 +76,8 @@ cd Start-Pulumi-with-EC2
 6. Name the role: `GitHubActionsPulumiRole`
 7. **Copy the Role ARN** - you need this next
 
-### Setup OIDC (if needed)
-If you get an error about OIDC provider:
+### Setup OIDC
+
 1. IAM → Identity providers → Add provider
 2. Provider type: OpenID Connect
 3. Provider URL: `https://token.actions.githubusercontent.com`
@@ -118,8 +118,9 @@ After deployment completes:
 
 ```bash
 cd infra
-pulumi destroy --stack dev
+pulumi destroy 
 ```
+(Note: Don't run `pulumi stack rm dev` to remove stack, as we gonna use it in the next step)
 
 ## Troubleshooting
 
