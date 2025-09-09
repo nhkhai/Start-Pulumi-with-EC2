@@ -18,7 +18,7 @@ Learn Pulumi → Setup AWS → Deploy Infrastructure → Visit Website → Make 
 ### 📖 [Part 1: What is Pulumi?](./workshop/01-Introduction-to-Pulumi.md)
 **20 minutes** - Why use code instead of clicking in AWS console?
 
-### 🛠️ [Part 2: Setup and Deploy](./workshop/02-Setup-and-Deploy-Guide.md) 
+### 🛠️ [Part 2: Setup and Deploy](./workshop/02-Setup-and-Deploy-on-Pulumi-Command.md) 
 **40 minutes** - Create AWS role, deploy your first infrastructure
 
 ### 🚀 [Part 3: Make Changes](./workshop/03-Bonus-Modify-Parameters-with-Git-Workflow.md)
