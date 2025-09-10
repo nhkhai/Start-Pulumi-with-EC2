@@ -7,8 +7,8 @@ project_name = pulumi.get_project() # from Pulumi.yaml: name: Start-Pulumi-with-
 
 config = pulumi.Config('workshop-config')
 org = config.require('org')
-github_org = config.require('githubOrg')
-pulumi_org = config.require('pulumiOrg')
+# github_org = config.require('githubOrg')
+# pulumi_org = config.require('pulumiOrg')
 
 aws_config = pulumi.Config('aws')
 aws_environment = aws_config.require_object('defaultTags')['tags']['Environment']
@@ -173,8 +173,8 @@ ec2_instance = aws.ec2.Instance("web-server-instance",
     })
 
 # --- Outputs ---
-pulumi.export("github_org", github_org)
-pulumi.export("pulumi_org", pulumi_org)
+# pulumi.export("github_org", github_org)
+# pulumi.export("pulumi_org", pulumi_org)
 pulumi.export("instance_id", ec2_instance.id)
 pulumi.export("public_ip", ec2_instance.public_ip)
 pulumi.export("public_dns", ec2_instance.public_dns)

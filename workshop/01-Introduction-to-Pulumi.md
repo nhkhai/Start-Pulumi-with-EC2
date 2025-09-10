@@ -6,8 +6,12 @@ Pulumi is a **modern Infrastructure as Code (IaC)** platform that lets you defin
 
 ## Why Use Pulumi?
 
+**Traditional Way (AWS Console):**
+- ❌ Create VPC manually → Create subnets → Configure routing → Set up security groups → Launch EC2 → Configure each piece individually
+- ❌ To clean up: Remember what you created → Delete in correct order → Hope you didn't miss anything → Still get charged for forgotten resources
 
 ### ⚡ **The Magic: Build and Destroy in One Command**
+
 
 This is where Pulumi truly shines compared to manual cloud console work:
 
@@ -29,9 +33,6 @@ graph LR
     F --> G[Everything Cleaned Up]
 ```
 
-**Traditional Way (AWS Console):**
-- ❌ Create VPC manually → Create subnets → Configure routing → Set up security groups → Launch EC2 → Configure each piece individually
-- ❌ To clean up: Remember what you created → Delete in correct order → Hope you didn't miss anything → Still get charged for forgotten resources
 
 ### 🚀 **Key Benefits**
 

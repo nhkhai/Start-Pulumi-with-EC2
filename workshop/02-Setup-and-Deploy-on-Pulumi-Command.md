@@ -1,4 +1,4 @@
-# Setup and Deploy Guide
+# Setup and Deploy on Pulumi Command 
 
 ## What You Need
 
