@@ -109,7 +109,7 @@ Add these secrets:
 
 ```bash
 cd infra
-pulumi preview # dry run and preview all the things which will be created 
+pulumi preview # paste the PULUMI_ACCESS_TOKEN and choose "dev" stack 
 pulumi up --stack dev
 ```
 

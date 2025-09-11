@@ -2,7 +2,7 @@
   "name": "Pulumi Dev",
   "image": "mcr.microsoft.com/devcontainers/python:dev-3",
   "forwardPorts": [],
-  "postCreateCommand": "cd infra && pip install -r requirements.txt && curl -fsSL https://get.pulumi.com | sh",
+  "postCreateCommand": "cd infra && pip install -r requirements.txt && curl -fsSL https://get.pulumi.com | sh && echo 'export PATH=$PATH:$HOME/.pulumi/bin' >> ~/.bashrc",
   "features": {
     "ghcr.io/devcontainers/features/aws-cli:1": {}
   },
