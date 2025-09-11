@@ -2,18 +2,25 @@
 
 ## What You Need
 
-- AWS Account 
+- AWS Account
+- AWS AccessKey and SecretAccessKey
 - GitHub account
 - Python
 
 ## Step 1: Get the Code
 
-1. Fork this repository to your GitHub account
-2. Clone it:
-```bash
-git clone https://github.com/YOUR_USERNAME/Start-Pulumi-with-EC2.git
-cd Start-Pulumi-with-EC2
-```
+1. [Fork this repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) to your GitHub account
+2. In your forked repository page, click on **Code**, then click on the **+** button under **Codespaces**, to Create a codespace on dev
+3. Wait for the codespace to finish setting up (this may take 3-4 minutes)
+4. Once it's ready, open the terminal in your codespace and run `aws configure` to configure the aws credentials 
+    - Enter your AWS credentials when prompted:
+        ```    
+        AWS Access Key ID: [Your AWS Access Key]
+        AWS Secret Access Key: [Your AWS Secret Key]
+        Default region name: ap-southeast-1
+        Default output format: json
+        ```
+
 
 ## Step 2: Create AWS Role for GitHub
 
@@ -102,7 +109,7 @@ Add these secrets:
 
 ```bash
 cd infra
-pip install -r requirements.txt
+pulumi preview # dry run and preview all the things which will be created 
 pulumi up --stack dev
 ```
 
