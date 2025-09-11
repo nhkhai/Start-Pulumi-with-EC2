@@ -9,7 +9,7 @@
 
 ## Step 1: Get the Code
 
-1. Fork this repository to your GitHub account
+1. [Fork this repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) to your GitHub account
 2. In your forked repository page, click on **Code**, then click on the **+** button under **Codespaces**, to Create a codespace on dev
 3. Wait for the codespace to finish setting up (this may take 3-4 minutes)
 4. Once it's ready, open the terminal in your codespace and run `aws configure` to configure the aws credentials 
