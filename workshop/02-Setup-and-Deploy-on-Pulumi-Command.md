@@ -8,7 +8,7 @@
 
 ## Step 1: Get the Code
 
-1. Fork this repository to your GitHub account
+1. [Fork this repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) to your GitHub account
 2. Clone it:
 ```bash
 git clone https://github.com/YOUR_USERNAME/Start-Pulumi-with-EC2.git
