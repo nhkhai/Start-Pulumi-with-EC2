@@ -163,7 +163,7 @@ sed -i "s/MANAGED_BY_PLACEHOLDER/$MANAGED_BY/g" /var/www/html/index.html
 
 # --- 5. Create EC2 Instance ---
 ec2_instance = aws.ec2.Instance("web-server-instance",
-    instance_type="t2.micro",
+    instance_type="t2.small",
     ami=ami.id,
     subnet_id=subnet.id,
     vpc_security_group_ids=[security_group.id],
