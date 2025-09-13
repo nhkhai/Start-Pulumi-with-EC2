@@ -100,46 +100,91 @@ cat > /var/www/html/index.html << 'EOF'
 <!DOCTYPE html>
 <html>
 <head>
-    <title>EC2 Instance & Pulumi Info</title>
+    <title>Pulumi EC2 Server</title>
     <style>
-        body {{ font-family: Arial; background: #222; color: #eee; padding: 40px; }}
-        .container {{ border: 1px solid #00ff99; padding: 40px; background: #333; border-radius: 12px; margin-bottom: 20px; }}
-        .pulumi-container {{ border: 1px solid #ff6b35; padding: 40px; background: #333; border-radius: 12px; }}
-        h1 {{ color: #00ff99; }}
-        h2 {{ color: #ff6b35; }}
-        h3 {{ color: #ccc; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px; }}
-        .highlight {{ color: #00ff99; font-weight: bold; }}
-        small {{ color: #999; font-style: italic; }}
+        body {{ 
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            color: #333;
+            padding: 40px;
+            line-height: 1.6;
+        }}
+        
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }}
+        
+        h1 {{ 
+            color: #2c5aa0;
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        
+        .section {{
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #2c5aa0;
+        }}
+        
+        .section h2 {{
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }}
+        
+        .info-item {{
+            margin-bottom: 8px;
+        }}
+        
+        .highlight {{
+            color: #2c5aa0;
+            font-weight: bold;
+        }}
+        
+        .footer {{
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-style: italic;
+        }}
     </style>
 </head>
 <body>
-    <!-- EC2 Instance Information -->
     <div class="container">
-        <h1>🖥️ EC2 Instance Information</h1>
-        <p><b>Instance ID:</b> INSTANCE_ID_PLACEHOLDER</p>
-        <p><b>Instance Type:</b> INSTANCE_TYPE_PLACEHOLDER</p>
-        <p><b>Availability Zone:</b> AVAILABILITY_ZONE_PLACEHOLDER</p>
-        <p><b>Region:</b> REGION_PLACEHOLDER</p>
-    </div>
-    
-    <!-- Pulumi Deployment Information -->
-    <div class="pulumi-container">
-        <h2>⚡ Pulumi Deployment Information</h2>
+        <h1>🚀 Pulumi EC2 Server</h1>
         
-        <h3>1. Project Details</h3>
-        <p><b>Project Name:</b> <span class="highlight">PROJECT_NAME_PLACEHOLDER</span></p>
-        <p><b>Stack:</b> <span class="highlight">STACK_PLACEHOLDER</span></p>
+        <div class="section">
+            <h2>🖥️ Server Information</h2>
+            <div class="info-item"><strong>Instance ID:</strong> <span class="highlight">INSTANCE_ID_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Type:</strong> <span class="highlight">INSTANCE_TYPE_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Zone:</strong> <span class="highlight">AVAILABILITY_ZONE_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Region:</strong> <span class="highlight">REGION_PLACEHOLDER</span></div>
+        </div>
         
-        <h3>2. Resource Naming & Tags</h3>
-        <p><b>AWS Resource Prefix:</b> <span class="highlight">ORG_PLACEHOLDER</span></p>
-        <p><b>Tags Applied:</b></p>
-        <ul>
-            <li><b>Environment:</b> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></li>
-            <li><b>ManagedBy:</b> <span class="highlight">MANAGED_BY_PLACEHOLDER</span></li>
-            <li><b>GitRepo:</b> <span class="highlight">GIT_REPO_PLACEHOLDER</span></li>
-        </ul>
-        <small>Example: This VPC is named "ORG_PLACEHOLDER-STACK_PLACEHOLDER-PROJECT_NAME_PLACEHOLDER-vpc" and tagged with Environment=ENVIRONMENT_PLACEHOLDER</small>
+        <div class="section">
+            <h2>⚡ Pulumi Project</h2>
+            <div class="info-item"><strong>Project:</strong> <span class="highlight">PROJECT_NAME_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Stack:</strong> <span class="highlight">STACK_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Organization:</strong> <span class="highlight">ORG_PLACEHOLDER</span></div>
+        </div>
         
+        <div class="section">
+            <h2>🏷️ Resource Tags</h2>
+            <div class="info-item"><strong>Environment:</strong> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Managed By:</strong> <span class="highlight">MANAGED_BY_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Git Repository:</strong> <span class="highlight">GIT_REPO_PLACEHOLDER</span></div>
+        </div>
+        
+        <div class="footer">
+            <p>✨ Created with Infrastructure as Code</p>
+        </div>
     </div>
 </body>
 </html>
