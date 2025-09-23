@@ -118,7 +118,7 @@ pulumi stack init # type: `<your-github-account-name>/dev`
 ![](./imgs/pulumi-stack-init.png)
 
 ```
-pulumi preview # dry run and preview all the things which will be created 
+pulumi preview # dry run
 ```
 ![](./imgs/pulumi-preview.png)
 

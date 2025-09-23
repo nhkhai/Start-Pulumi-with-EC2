@@ -139,6 +139,16 @@ cat > /var/www/html/index.html << 'eof'
         </ul>
         <small>example: this vpc is named "org_placeholder-stack_placeholder-project_name_placeholder-vpc" and tagged with environment=environment_placeholder</small>
         
+        <div class="section">
+            <h2>🏷️ Resource Tags</h2>
+            <div class="info-item"><strong>Environment:</strong> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Managed By:</strong> <span class="highlight">MANAGED_BY_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Git Repository:</strong> <span class="highlight">GIT_REPO_PLACEHOLDER</span></div>
+        </div>
+        
+        <div class="footer">
+            <p>✨ Created with Infrastructure as Code</p>
+        </div>
     </div>
 </body>
 </html>
@@ -161,7 +171,7 @@ sed -i "s/MANAGED_BY_PLACEHOLDER/$MANAGED_BY/g" /var/www/html/index.html
 
 # --- 5. Create EC2 Instance ---
 ec2_instance = aws.ec2.Instance("web-server-instance",
-    instance_type="t2.micro",
+    instance_type="t2.small",
     ami=ami.id,
     subnet_id=subnet.id,
     vpc_security_group_ids=[security_group.id],
