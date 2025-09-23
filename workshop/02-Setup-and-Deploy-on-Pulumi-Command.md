@@ -12,6 +12,10 @@
 1. [Fork this repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) to your GitHub account
 2. In your forked repository page, click on **Code**, then click on the **+** button under **Codespaces**, to Create a codespace on dev
 3. Wait for the codespace to finish setting up (this may take 3-4 minutes)
+- check if the codespace is ready by open a new termminal and typing `pulumi version`
+
+    ![](./imgs/check-pulumi-version.png)
+
 4. Once it's ready, open the terminal in your codespace and run `aws configure` to configure the aws credentials 
     - Enter your AWS credentials when prompted:
         ```    
@@ -109,7 +113,16 @@ Add these secrets:
 
 ```bash
 cd infra
+pulumi stack init # type: `<your-github-account-name>/dev`
+```
+![](./imgs/pulumi-stack-init.png)
+
+```
 pulumi preview # dry run and preview all the things which will be created 
+```
+![](./imgs/pulumi-preview.png)
+
+```
 pulumi up --stack dev
 ```
 

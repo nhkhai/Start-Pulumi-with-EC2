@@ -83,7 +83,7 @@ Once deployment completes:
 
 ## More Changes to Try: Make the Webpage More Pretty
 
-Replace the HTML section in `infra/__main__.py` (around line 101 to line 141) with this beautiful version:
+Replace the HTML section in `infra/__main__.py` (around line 99 to line 146) with this beautiful version:
 
 ```python
 

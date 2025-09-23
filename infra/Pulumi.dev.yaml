@@ -5,9 +5,7 @@ config:
       Environment: dev
       ManagedBy: Pulumi
       GitRepo: Start-Pulumi-with-EC2
-  workshop-config:githubOrg: this-is-github-org   # just a label
   workshop-config:org: workshop-resources-org # in aws account resources will be named as workshop-resources-org-dev-web-server-vpc
-  workshop-config:pulumiOrg: this-is-pulumi-org  # just a label
 
-  # workshop-config: namespace 
+  # workshop-config is a namespace 
 

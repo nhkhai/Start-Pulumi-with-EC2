@@ -7,8 +7,6 @@ project_name = pulumi.get_project() # from Pulumi.yaml: name: Start-Pulumi-with-
 
 config = pulumi.Config('workshop-config')
 org = config.require('org')
-# github_org = config.require('githubOrg')
-# pulumi_org = config.require('pulumiOrg')
 
 aws_config = pulumi.Config('aws')
 aws_environment = aws_config.require_object('defaultTags')['tags']['Environment']
@@ -96,13 +94,14 @@ GIT_REPO="{aws_git_repo}"
 
 
 # Create simple HTML page directly
-cat > /var/www/html/index.html << 'EOF'
-<!DOCTYPE html>
+sed -i "s/stack_placeholder/$stack/g" /var/www/html/index.html
+cat > /var/www/html/index.html << 'eof'
+<!doctype html>
 <html>
 <head>
-    <title>EC2 Instance & Pulumi Info</title>
+    <title>ec2 instance & pulumi info</title>
     <style>
-        body {{ font-family: Arial; background: #222; color: #eee; padding: 40px; }}
+        body {{ font-family: arial; background: #222; color: #eee; padding: 40px; }}
         .container {{ border: 1px solid #00ff99; padding: 40px; background: #333; border-radius: 12px; margin-bottom: 20px; }}
         .pulumi-container {{ border: 1px solid #ff6b35; padding: 40px; background: #333; border-radius: 12px; }}
         h1 {{ color: #00ff99; }}
@@ -113,48 +112,47 @@ cat > /var/www/html/index.html << 'EOF'
     </style>
 </head>
 <body>
-    <!-- EC2 Instance Information -->
+    <!-- ec2 instance information -->
     <div class="container">
-        <h1>🖥️ EC2 Instance Information</h1>
-        <p><b>Instance ID:</b> INSTANCE_ID_PLACEHOLDER</p>
-        <p><b>Instance Type:</b> INSTANCE_TYPE_PLACEHOLDER</p>
-        <p><b>Availability Zone:</b> AVAILABILITY_ZONE_PLACEHOLDER</p>
-        <p><b>Region:</b> REGION_PLACEHOLDER</p>
+        <h1>🖥️ ec2 instance information</h1>
+        <p><b>instance id:</b> instance_id_placeholder</p>
+        <p><b>instance type:</b> instance_type_placeholder</p>
+        <p><b>availability zone:</b> availability_zone_placeholder</p>
+        <p><b>region:</b> region_placeholder</p>
     </div>
     
-    <!-- Pulumi Deployment Information -->
+    <!-- pulumi deployment information -->
     <div class="pulumi-container">
-        <h2>⚡ Pulumi Deployment Information</h2>
+        <h2>⚡ pulumi deployment information</h2>
         
-        <h3>1. Project Details</h3>
-        <p><b>Project Name:</b> <span class="highlight">PROJECT_NAME_PLACEHOLDER</span></p>
-        <p><b>Stack:</b> <span class="highlight">STACK_PLACEHOLDER</span></p>
+        <h3>1. project details</h3>
+        <p><b>project name:</b> <span class="highlight">project_name_placeholder</span></p>
+        <p><b>stack:</b> <span class="highlight">stack_placeholder</span></p>
         
-        <h3>2. Resource Naming & Tags</h3>
-        <p><b>AWS Resource Prefix:</b> <span class="highlight">ORG_PLACEHOLDER</span></p>
-        <p><b>Tags Applied:</b></p>
+        <h3>2. resource naming & tags</h3>
+        <p><b>aws resource prefix:</b> <span class="highlight">org_placeholder</span></p>
+        <p><b>tags applied:</b></p>
         <ul>
-            <li><b>Environment:</b> <span class="highlight">ENVIRONMENT_PLACEHOLDER</span></li>
-            <li><b>ManagedBy:</b> <span class="highlight">MANAGED_BY_PLACEHOLDER</span></li>
-            <li><b>GitRepo:</b> <span class="highlight">GIT_REPO_PLACEHOLDER</span></li>
+            <li><b>environment:</b> <span class="highlight">environment_placeholder</span></li>
+            <li><b>managedby:</b> <span class="highlight">managed_by_placeholder</span></li>
+            <li><b>gitrepo:</b> <span class="highlight">git_repo_placeholder</span></li>
         </ul>
-        <small>Example: This VPC is named "ORG_PLACEHOLDER-STACK_PLACEHOLDER-PROJECT_NAME_PLACEHOLDER-vpc" and tagged with Environment=ENVIRONMENT_PLACEHOLDER</small>
+        <small>example: this vpc is named "org_placeholder-stack_placeholder-project_name_placeholder-vpc" and tagged with environment=environment_placeholder</small>
         
     </div>
 </body>
 </html>
-EOF
+eof
 
 
 
-# Replace placeholders with actual values
-sed -i "s/INSTANCE_ID_PLACEHOLDER/$INSTANCE_ID/g" /var/www/html/index.html
-sed -i "s/INSTANCE_TYPE_PLACEHOLDER/$INSTANCE_TYPE/g" /var/www/html/index.html  
-sed -i "s/AVAILABILITY_ZONE_PLACEHOLDER/$AVAILABILITY_ZONE/g" /var/www/html/index.html
-sed -i "s/REGION_PLACEHOLDER/$REGION/g" /var/www/html/index.html
+# replace placeholders with actual values
+sed -i "s/instance_id_placeholder/$instance_id/g" /var/www/html/index.html
+sed -i "s/instance_type_placeholder/$instance_type/g" /var/www/html/index.html  
+sed -i "s/availability_zone_placeholder/$availability_zone/g" /var/www/html/index.html
+sed -i "s/region_placeholder/$region/g" /var/www/html/index.html
 
 sed -i "s/PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" /var/www/html/index.html
-sed -i "s/STACK_PLACEHOLDER/$STACK/g" /var/www/html/index.html
 sed -i "s/ORG_PLACEHOLDER/$ORG/g" /var/www/html/index.html
 sed -i "s/ENVIRONMENT_PLACEHOLDER/$ENVIRONMENT/g" /var/www/html/index.html
 sed -i "s/GIT_REPO_PLACEHOLDER/$GIT_REPO/g" /var/www/html/index.html
