@@ -98,49 +98,85 @@ GIT_REPO="{aws_git_repo}"
 
 # Create simple HTML page directly
 sed -i "s/stack_placeholder/$stack/g" /var/www/html/index.html
-cat > /var/www/html/index.html << 'eof'
-<!doctype html>
+
+cat > /var/www/html/index.html << 'EOF'
+<!DOCTYPE html>
 <html>
 <head>
-    <title>ec2 instance & pulumi info</title>
+    <title>Pulumi EC2 Server</title>
     <style>
-        body {{ font-family: arial; background: #222; color: #eee; padding: 40px; }}
-        .container {{ border: 1px solid #00ff99; padding: 40px; background: #333; border-radius: 12px; margin-bottom: 20px; }}
-        .pulumi-container {{ border: 1px solid #ff6b35; padding: 40px; background: #333; border-radius: 12px; }}
-        h1 {{ color: #00ff99; }}
-        h2 {{ color: #ff6b35; }}
-        h3 {{ color: #ccc; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px; }}
-        .highlight {{ color: #00ff99; font-weight: bold; }}
-        small {{ color: #999; font-style: italic; }}
+        body {{ 
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            color: #333;
+            padding: 40px;
+            line-height: 1.6;
+        }}
+        
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }}
+        
+        h1 {{ 
+            color: #2c5aa0;
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        
+        .section {{
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #2c5aa0;
+        }}
+        
+        .section h2 {{
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }}
+        
+        .info-item {{
+            margin-bottom: 8px;
+        }}
+        
+        .highlight {{
+            color: #2c5aa0;
+            font-weight: bold;
+        }}
+        
+        .footer {{
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-style: italic;
+        }}
     </style>
 </head>
 <body>
-    <!-- ec2 instance information -->
     <div class="container">
-        <h1>🖥️ ec2 instance information</h1>
-        <p><b>instance id:</b> instance_id_placeholder</p>
-        <p><b>instance type:</b> instance_type_placeholder</p>
-        <p><b>availability zone:</b> availability_zone_placeholder</p>
-        <p><b>region:</b> region_placeholder</p>
-    </div>
-    
-    <!-- pulumi deployment information -->
-    <div class="pulumi-container">
-        <h2>⚡ pulumi deployment information</h2>
+        <h1>🚀 Pulumi EC2 Server</h1>
         
-        <h3>1. project details</h3>
-        <p><b>project name:</b> <span class="highlight">project_name_placeholder</span></p>
-        <p><b>stack:</b> <span class="highlight">stack_placeholder</span></p>
+        <div class="section">
+            <h2>🖥️ Server Information</h2>
+            <div class="info-item"><strong>Instance ID:</strong> <span class="highlight">INSTANCE_ID_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Type:</strong> <span class="highlight">INSTANCE_TYPE_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Zone:</strong> <span class="highlight">AVAILABILITY_ZONE_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Region:</strong> <span class="highlight">REGION_PLACEHOLDER</span></div>
+        </div>
         
-        <h3>2. resource naming & tags</h3>
-        <p><b>aws resource prefix:</b> <span class="highlight">org_placeholder</span></p>
-        <p><b>tags applied:</b></p>
-        <ul>
-            <li><b>environment:</b> <span class="highlight">environment_placeholder</span></li>
-            <li><b>managedby:</b> <span class="highlight">managed_by_placeholder</span></li>
-            <li><b>gitrepo:</b> <span class="highlight">git_repo_placeholder</span></li>
-        </ul>
-        <small>example: this vpc is named "org_placeholder-stack_placeholder-project_name_placeholder-vpc" and tagged with environment=environment_placeholder</small>
+        <div class="section">
+            <h2>⚡ Pulumi Project</h2>
+            <div class="info-item"><strong>Project:</strong> <span class="highlight">PROJECT_NAME_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Stack:</strong> <span class="highlight">STACK_PLACEHOLDER</span></div>
+            <div class="info-item"><strong>Organization:</strong> <span class="highlight">ORG_PLACEHOLDER</span></div>
+        </div>
         
         <div class="section">
             <h2>🏷️ Resource Tags</h2>
@@ -155,7 +191,7 @@ cat > /var/www/html/index.html << 'eof'
     </div>
 </body>
 </html>
-eof
+EOF
 
 
 
